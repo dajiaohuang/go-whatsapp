@@ -1,10 +1,10 @@
 package whatsapp
 
 import (
+	"errors"
 	"github.com/Rhymen/go-whatsapp/binary"
 	"strings"
 	"sync"
-	"errors"
 )
 
 type Store struct {
@@ -61,11 +61,14 @@ func (sr *Store) updateContacts(contacts interface{}) {
 }
 
 func (sr *Store) GetContacts() map[string]Contact {
-
-	defer sr.RUnlock()
 	sr.RLock()
+	defer sr.RUnlock()
 
-	return sr.Contacts
+	contacts := make(map[string]Contact, len(sr.Contacts))
+	for jid, contact := range sr.Contacts {
+		contacts[jid] = contact
+	}
+	return contacts
 }
 
 func (sr *Store) GetContact(jid string) (Contact, bool) {
@@ -123,17 +126,20 @@ func (sr *Store) updateChats(chats interface{}) {
 }
 
 func (sr *Store) GetChats() map[string]Chat {
-
-	defer sr.RUnlock()
 	sr.RLock()
+	defer sr.RUnlock()
 
-	return sr.Chats
+	chats := make(map[string]Chat, len(sr.Chats))
+	for jid, chat := range sr.Chats {
+		chats[jid] = chat
+	}
+	return chats
 }
 
 func (sr *Store) GetChat(jid string) (Chat, bool) {
 
-	defer sr.RUnlock()
 	sr.RLock()
+	defer sr.RUnlock()
 
 	if chat, ok := sr.Chats[jid]; ok {
 		return chat, ok
@@ -148,8 +154,8 @@ func (sr *Store) AddChat(chat Chat) error {
 		return errors.New("jit cannot be empty ")
 	}
 
-	defer sr.RUnlock()
-	sr.RLock()
+	sr.Lock()
+	defer sr.Unlock()
 
 	jid := strings.Replace(chat.Jid, "@c.us", "@s.whatsapp.net", 1)
 	sr.Chats[jid] = chat
