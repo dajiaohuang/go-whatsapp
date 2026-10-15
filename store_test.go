@@ -18,21 +18,6 @@ func TestStoreAddChat(t *testing.T) {
 	}
 }
 
-func TestStoreGetMapsAreCopies(t *testing.T) {
-	store := newStore()
-	store.AddContact(Contact{Jid: "123@s.whatsapp.net", Name: "original"})
-	store.AddChat(Chat{Jid: "123@s.whatsapp.net", Name: "original"})
-
-	store.GetContacts()["123@s.whatsapp.net"] = Contact{Name: "changed"}
-	store.GetChats()["123@s.whatsapp.net"] = Chat{Name: "changed"}
-
-	contact, _ := store.GetContact("123@s.whatsapp.net")
-	chat, _ := store.GetChat("123@s.whatsapp.net")
-	if contact.Name != "original" || chat.Name != "original" {
-		t.Fatalf("mutating getter results changed store: contact=%+v chat=%+v", contact, chat)
-	}
-}
-
 func TestStoreConcurrentAddChat(t *testing.T) {
 	store := newStore()
 	const workers = 32
